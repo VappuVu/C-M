@@ -1,0 +1,97 @@
+
+startState([3,3,left,0,0]).
+finishState([0,0,right,3,3]).
+
+legal(CL,ML,CR,MR) :-
+
+	ML>=0, CL>=0, MR>=0, CR>=0,
+	(ML>=CL ; ML=0),
+	(MR>=CR ; MR=0).
+
+
+move([CL,ML,left,CR,MR],[CL,ML2,right,CR,MR2]):- %the boat moving from left to right with the passengers on board
+	% Two missionaries cross crom left to right.
+	MR2 is MR+2, % the number of the missionaries on the right side (either 1 or 1) increased with two
+	ML2 is ML-2, % the number of the missionaries on the left after two have left (   either 0 or 1)
+	legal(CL,ML2,CR,MR2).%resetting the names kind of
+
+move([CL,ML,left,CR,MR],[CL2,ML,right,CR2,MR]):-
+	% Two cannibals cross from left to right.
+	CR2 is CR+2, 
+	CL2 is CL-2,
+	legal(CL2,ML,CR2,MR). 
+
+move([CL,ML,left,CR,MR],[CL2,ML2,right,CR2,MR2]):-
+	%  One missionary and one cannibal cross from left to right.
+	CR2 is CR+1,
+	CL2 is CL-1,
+	MR2 is MR+1,
+	ML2 is ML-1,
+	legal(CL2,ML2,CR2,MR2). 
+
+move([CL,ML,left,CR,MR],[CL,ML2,right,CR,MR2]):-
+	% One missionary crosses from left to right.
+	MR2 is MR+1,
+	ML2 is ML-1,
+	legal(CL,ML2,CR,MR2).
+
+move([CL,ML,left,CR,MR],[CL2,ML,right,CR2,MR]):-
+	% One cannibal crosses from left to right.
+	CR2 is CR+1,
+	CL2 is CL-1,
+	legal(CL2,ML,CR2,MR).
+
+move([CL,ML,right,CR,MR],[CL,ML2,left,CR,MR2]):-
+	% Two missionaries cross from right to left.
+	MR2 is MR-2,
+	ML2 is ML+2,
+	legal(CL,ML2,CR,MR2).
+
+move([CL,ML,right,CR,MR],[CL2,ML,left,CR2,MR]):-
+	% Two cannibals cross from right to left.
+	CR2 is CR-2,
+	CL2 is CL+2,
+	legal(CL2,ML,CR2,MR).
+
+move([CL,ML,right,CR,MR],[CL2,ML2,left,CR2,MR2]):-
+	%  One missionary and one cannibal cross from right to left.
+	CR2 is CR-1,
+	CL2 is CL+1,
+	MR2 is MR-1,
+	ML2 is ML+1,
+	legal(CL2,ML2,CR2,MR2).
+
+move([CL,ML,right,CR,MR],[CL,ML2,left,CR,MR2]):-
+	% One missionary crosses from right to left.
+	MR2 is MR-1,
+	ML2 is ML+1,
+	legal(CL,ML2,CR,MR2).
+
+move([CL,ML,right,CR,MR],[CL2,ML,left,CR2,MR]):-
+	% One cannibal crosses from right to left.
+	CR2 is CR-1,
+	CL2 is CL+1,
+	legal(CL2,ML,CR2,MR).
+
+
+% recursive rule
+path([CL1,ML1,B1,CR1,MR1],[CL2,ML2,B2,CR2,MR2],Explored,MovesList) :- %defines the function path of the code
+   move([CL1,ML1,B1,CR1,MR1],[CL3,ML3,B3,CR3,MR3]), %defines the initial state and the final state
+   not(member([CL3,ML3,B3,CR3,MR3],Explored)), %makes sure that the new state has not been explored before, i.e. ensures that you don't return to situations that you have been already
+   path([CL3,ML3,B3,CR3,MR3],[CL2,ML2,B2,CR2,MR2],[[CL3,ML3,B3,CR3,MR3]|Explored],[ [[CL3,ML3,B3,CR3,MR3],[CL1,ML1,B1,CR1,MR1]] | MovesList ]). %iterates the "explored" list
+
+
+path([CL,ML,B,CR,MR],[CL,ML,B,CR,MR],_,MovesList):- 
+	output(MovesList).%tells prolog to give a list of the moves as an output
+
+
+output([]) :- nl.
+output([[A,B]|MovesList]) :-
+	output(MovesList),
+	write(B), write(' -> '), write(A), nl. %instructions on how to write the results
+
+
+find :-
+   path([3,3,left,0,0],[0,0,right,3,3],[[3,3,left,0,0]],_). %from initial state to the final state,but not using the moves/states that have already been explored 
+
+% to run the code, write: find.
